@@ -27,7 +27,7 @@ def play_sound(track):
 	chunk = 1024
 
 	# open a wav format music
-	f = wave.open(track, "rb")
+	f = wave.open("./sounds/"+track, "rb")
 	# instantiate PyAudio
 	p = pyaudio.PyAudio()
 	# open stream
