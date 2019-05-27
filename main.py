@@ -1,6 +1,7 @@
 import serial
 import pyaudio
 import wave
+import time
 
 arduino = serial.Serial(port='/dev/cu.HC-06-DevB', baudrate=9600, timeout=.1)
 G_prevaccelX = 0
@@ -40,7 +41,6 @@ def play_sound(track):
 
 	# play stream
 	while data:
-		arduino_data = arduino.readline()[:-2]
 		stream.write(data)
 		data = f.readframes(chunk)
 
@@ -51,21 +51,50 @@ def play_sound(track):
 	# close PyAudio
 	p.terminate()
 
+def read_start():
+	reset = False
 
-while True:
-    # the last bit gets rid of the new-line chars
-    data = arduino.readline()[:-2]
-    if data:
+	while True:
+		while not reset:
+			print(reset)
+			data = arduino.readline()[:-2]
+			if data:
+				dataAsString = data.decode("utf-8").split(',')
+				# print(dataAsString)
+				if (len(dataAsString) == 6):
+					if abs(int(dataAsString[4])) > 32000:
+						reset = True
+						time.sleep(1)
+					G_xaccel = int(dataAsString[0]) * 9.8 / 16000
+					G_yaccel = int(dataAsString[1]) * 9.8 / 16000
+					G_zaccel = int(dataAsString[2]) * 9.8 / 16000
+		
+		while reset:
+			print(reset)
+			data = arduino.readline()[:-2]
+			if data:
+				dataAsString = data.decode("utf-8").split(',')
+				# print(dataAsString)
+				if (len(dataAsString) == 6):
+					if abs(int(dataAsString[4])) > 32000:
+						reset = False
+						time.sleep(1)
 
-        dataAsString = data.decode("utf-8").split(',')
-        # print(dataAsString)
-        if (len(dataAsString) == 6):
-            G_xaccel = int(dataAsString[0]) * 9.8 / 16000
-            G_yaccel = int(dataAsString[1]) * 9.8 / 16000
-            G_zaccel = int(dataAsString[2]) * 9.8 / 16000
+		
+if __name__ == '__main__':
+    read_start()
 
-            if(abs(G_zaccel) > 12):
-                play_sound("fist_pump.wav")
+
+
+
+
+
+
+
+
+
+
+
 
             # ...
             # xjerk_new =  (G_xaccel - G_prevaccelX)/delay
