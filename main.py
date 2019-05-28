@@ -4,24 +4,13 @@ import wave
 import time
 
 arduino = serial.Serial(port='/dev/cu.HC-06-DevB', baudrate=9600, timeout=.1)
+
+#global variables
 G_prevaccelX = 0
 G_prevaccelY = 0
 G_prevaccelZ = 0
-xpos = 0
-ypos = 0
-zpos = 0
-xaccel = 0
-yaccel = 0
-zaccel = 0
-xvelocity = 0
-yvelocity = 0
-zvelocity = 0
-xjerk = 0
-yjerk = 0
-zjerk = 0
 
 delay = .005
-
 
 def play_sound(track):
 	# define stream chunk
@@ -51,50 +40,75 @@ def play_sound(track):
 	# close PyAudio
 	p.terminate()
 
+def tada_eval(tf1, tf3, tf5):
+	#12k for y accel, 32k for x rotation
+	condition1 = False
+	condition2 = False
+
+	for val1, val2 in zip(tf1, tf3):
+		if val1 > 12000:
+			condition1 = True
+		if val2 > 30000:
+			condition2 = True
+		if condition1 and condition2:
+			tf1 = []
+			tf3 = []
+			tf5 = []
+			play_sound("tada.wav")
+			return True	
+	return False	
+
 def read_start():
-	reset = False
+	print("starting M2M processor...")
+	tf0 = []
+	tf1 = []
+	tf2 = []
+	tf3 = []
+	tf4 = []
+	tf5 = []
 
 	while True:
-		while not reset:
-			print(reset)
-			data = arduino.readline()[:-2]
-			if data:
-				dataAsString = data.decode("utf-8").split(',')
-				# print(dataAsString)
-				if (len(dataAsString) == 6):
-					if abs(int(dataAsString[4])) > 32000:
-						reset = True
-						time.sleep(1)
-					G_xaccel = int(dataAsString[0]) * 9.8 / 16000
-					G_yaccel = int(dataAsString[1]) * 9.8 / 16000
-					G_zaccel = int(dataAsString[2]) * 9.8 / 16000
-		
-		while reset:
-			print(reset)
-			data = arduino.readline()[:-2]
-			if data:
-				dataAsString = data.decode("utf-8").split(',')
-				# print(dataAsString)
-				if (len(dataAsString) == 6):
-					if abs(int(dataAsString[4])) > 32000:
-						reset = False
-						time.sleep(1)
+		new_line = arduino.readline()[:-2]
+		if new_line:
+			try: 
+				data = [int(i) for i in new_line.decode("utf-8").split(',')]
+			except:
+				continue
+			
+			if len(data) == 6:	
+				tf0.append(data[0])
+				tf1.append(data[1])
+				tf2.append(data[2])
+				tf3.append(data[3])
+				tf4.append(data[4])
+				tf5.append(data[5])
+				if len(tf0) < 100:
+					continue
+				tf0 = tf0[1:]
+				tf1 = tf1[1:]
+				tf2 = tf2[1:]
+				tf3 = tf3[1:]
+				tf4 = tf4[1:]
+				tf5 = tf5[1:]
+				if tada_eval(tf1, tf3, tf5):
+					print("TADA")
+					tf0 = []
+					tf1 = []
+					tf2 = []
+					tf3 = []
+					tf4 = []
+					tf5 = []
+					time.sleep(1)
 
+			# if len(data)==6:
+			# 	data = [int(i) for i in data]
+			# 	print(data)
+
+
+		
 		
 if __name__ == '__main__':
     read_start()
-
-
-
-
-
-
-
-
-
-
-
-
 
             # ...
             # xjerk_new =  (G_xaccel - G_prevaccelX)/delay
