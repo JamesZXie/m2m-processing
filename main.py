@@ -56,6 +56,57 @@ def tada_eval(tf1, tf3, tf5):
             return True
     return False
 
+def boing_eval(tf0, tf3, tf5):
+    condition1 = 0
+    condition2 = 0
+    condition3 = 0
+    condition4 = False
+
+    for val1, val2, val3 in zip(tf0, tf3, tf5):
+        if val2 > 20000: 
+            condition1 = True
+        elif val2 < -20000:
+            condition2 = True
+        elif condition1 and condition2 and val2 > 20000:
+            condition3 = True
+        if (val1 > 5000 or val1 < -5000) or (val3 > 5000 or val3 < -5000):
+            condition4 = True
+        if  condition3 and not condition4:
+            return True
+    return False
+
+def baseball_eval(tf3, tf5):
+    condition1 = 0
+    condition2 = 0
+    condition3 = 0
+    condition4 = 0
+
+    for val1, val2 in zip(tf3, tf5):
+        if val1 > 25000:
+            condition1 = True
+        elif val1 < 25000:
+            condition2 = True
+        if val2 < -30000:
+            condition3 = True
+        elif val2 > 30000:
+            condition4 = True
+        if condition1 and condition2 and condition3 and condition4:
+            return True
+    return False
+
+def skrrt_eval(tf4):
+# y rotation rn; need more data
+    condition1 = 0
+    condition2 = 0
+    # add more later
+    for val1 in zip(tf4):
+        if val1 > 30000:
+            condition1 = True
+        elif val1 < -30000
+            condition2 = True
+        if condition1 and condition2 and val1 > 30000:
+            return True
+    return False
 
 def read_start():
     print("starting M2M processor...")
@@ -74,10 +125,10 @@ def read_start():
             except:
                 continue
 
-            # if len(data)==6:
-            # 	data = [int(i) for i in data]
-            # 	print(data)
-            # continue
+            if len(data)==6:
+            	data = [int(i) for i in data]
+            	print(data)
+            continue
 
             if len(data) == 6:
                 tf0.append(data[0])
@@ -106,19 +157,42 @@ def read_start():
                     tf3 = []
                     tf4 = []
                     tf5 = []
-				# if skrrt_eval(tf1, tf3, tf5):
-                #     arduino.flush()
-                #     play_sound("tada.wav")
-                #     print("TADA")
-                #     for i in range(209):
-	            #         arduino.readline()
-                #     tf0 = []
-                #     tf1 = []
-                #     tf2 = []
-                #     tf3 = []
-                #     tf4 = []
-                #     tf5 = []
-                #     # time.sleep(1)
+                 if boing_eval(tf0, tf3, tf5):
+                    arduino.flush()
+                    play_sound("boing.wav")
+                    print("BOING")
+                    for i in range(109):
+                        arduino.readline()
+                    tf0 = []
+                    tf1 = []
+                    tf2 = []
+                    tf3 = []
+                    tf4 = []
+                    tf5 = []
+                if baseball_eval(tf3, tf5):
+                    arduino.flush()
+                    play_sound("swing.wav")
+                    print("SWING")
+                    for i in range(209):
+                        arduino.readline()
+                    tf0 = []
+                    tf1 = []
+                    tf2 = []
+                    tf3 = []
+                    tf4 = []
+                    tf5 = []
+				if skrrt_eval(tf4):
+                    arduino.flush()
+                    play_sound("skrrt.wav")
+                    print("SKRRT SKRRT")
+                    for i in range(209):
+	                   arduino.readline()
+                     tf0 = []
+                     tf1 = []
+                     tf2 = []
+                     tf3 = []
+                     tf4 = []
+                     tf5 = []
 
             # if len(data)==6:
             # 	data = [int(i) for i in data]
