@@ -42,55 +42,46 @@ def play_sound(track):
     p.terminate()
 
 
-def tada_eval(tf1, tf3, tf5):
+def tada_eval(tf0, tf1, tf3, tf5):
     # 12k for y accel, 32k for x rotation
-    condition1 = 0
-    condition2 = 0
-
-    for val1, val2 in zip(tf1, tf3):
-        if val1 > 12000:
-            condition1 = True
-        if val2 > 30000:
-            condition2 = True
-        if condition1 and condition2:
-            return True
-    return False
-
-def boing_eval(tf0, tf3, tf5):
-    condition1 = 0
-    condition2 = 0
+    condition1 = False
+    condition2 = False
     condition3 = 0
     condition4 = False
 
-    for val1, val2, val3 in zip(tf0, tf3, tf5):
-        if val2 > 20000: 
+    for val0, val1, val3, val5 in zip(tf0, tf1, tf3, tf5):
+        if val1 > 12000:
             condition1 = True
-        elif val2 < -20000:
+        if val3 > 30000:
             condition2 = True
-        elif condition1 and condition2 and val2 > 20000:
-            condition3 = True
-        if (val1 > 5000 or val1 < -5000) or (val3 > 5000 or val3 < -5000):
+        if val0 < -14000: 
+            condition3 += 1
+        if val5 < -25000: 
             condition4 = True
-        if  condition3 and not condition4:
+        if condition1 and condition2 and condition4 and condition3 > 5:
             return True
     return False
 
-def baseball_eval(tf3, tf5):
+def boing_eval(tf3):
     condition1 = 0
     condition2 = 0
-    condition3 = 0
-    condition4 = 0
 
-    for val1, val2 in zip(tf3, tf5):
-        if val1 > 25000:
+    for val1 in tf3:
+        if val1 < -10000: 
+            condition1 += 1
+        if val1 > 10000: 
+            condition2 += 1
+        if  condition1 > 4 and condition2 > 4:
+            return True
+    return False
+
+def baseball_eval(tf1, tf2, tf4, tf5):
+    condition1 = False
+
+    for val1, val2, val4, val5 in zip(tf1, tf2, tf4, tf5):
+        if val1 > 25000 and val2 > 25000 and val4 > 25000 and val5 > 25000:
             condition1 = True
-        elif val1 < 25000:
-            condition2 = True
-        if val2 < -30000:
-            condition3 = True
-        elif val2 > 30000:
-            condition4 = True
-        if condition1 and condition2 and condition3 and condition4:
+        if condition1:
             return True
     return False
 
@@ -99,10 +90,10 @@ def skrrt_eval(tf4):
     condition1 = 0
     condition2 = 0
     # add more later
-    for val1 in zip(tf4):
+    for val1 in tf4:
         if val1 > 30000:
             condition1 = True
-        elif val1 < -30000
+        elif val1 < -30000:
             condition2 = True
         if condition1 and condition2 and val1 > 30000:
             return True
@@ -125,10 +116,10 @@ def read_start():
             except:
                 continue
 
-            if len(data)==6:
-            	data = [int(i) for i in data]
-            	print(data)
-            continue
+            # if len(data)==6:
+            # 	data = [int(i) for i in data]
+            # 	print(data)
+            # continue
 
             if len(data) == 6:
                 tf0.append(data[0])
@@ -137,7 +128,7 @@ def read_start():
                 tf3.append(data[3])
                 tf4.append(data[4])
                 tf5.append(data[5])
-                if len(tf0) < 100:
+                if len(tf0) < 50:
                     continue
                 tf0 = tf0[1:]
                 tf1 = tf1[1:]
@@ -145,7 +136,7 @@ def read_start():
                 tf3 = tf3[1:]
                 tf4 = tf4[1:]
                 tf5 = tf5[1:]
-                if tada_eval(tf1, tf3, tf5):
+                if tada_eval(tf0, tf1, tf3, tf5):
                     arduino.flush()
                     play_sound("tada.wav")
                     print("TADA")
@@ -157,10 +148,22 @@ def read_start():
                     tf3 = []
                     tf4 = []
                     tf5 = []
-                 if boing_eval(tf0, tf3, tf5):
+                # if boing_eval(tf3):
+                #     arduino.flush()
+                #     play_sound("boing.wav")
+                #     print("BOING")
+                #     for i in range(109):
+                #         arduino.readline()
+                #     tf0 = []
+                #     tf1 = []
+                #     tf2 = []
+                #     tf3 = []
+                #     tf4 = []
+                #     tf5 = []
+                if baseball_eval(tf1, tf2, tf4, tf5):
                     arduino.flush()
-                    play_sound("boing.wav")
-                    print("BOING")
+                    play_sound("swing.wav")
+                    print("SWING")
                     for i in range(109):
                         arduino.readline()
                     tf0 = []
@@ -169,30 +172,18 @@ def read_start():
                     tf3 = []
                     tf4 = []
                     tf5 = []
-                if baseball_eval(tf3, tf5):
-                    arduino.flush()
-                    play_sound("swing.wav")
-                    print("SWING")
-                    for i in range(209):
-                        arduino.readline()
-                    tf0 = []
-                    tf1 = []
-                    tf2 = []
-                    tf3 = []
-                    tf4 = []
-                    tf5 = []
-				if skrrt_eval(tf4):
-                    arduino.flush()
-                    play_sound("skrrt.wav")
-                    print("SKRRT SKRRT")
-                    for i in range(209):
-	                   arduino.readline()
-                     tf0 = []
-                     tf1 = []
-                     tf2 = []
-                     tf3 = []
-                     tf4 = []
-                     tf5 = []
+                # if skrrt_eval(tf4):
+                #     arduino.flush()
+                #     play_sound("skrrt.wav")
+                #     print("SKRRT SKRRT")
+                #     for i in range(209):
+                #         arduino.readline()
+                #     tf0 = []
+                #     tf1 = []
+                #     tf2 = []
+                #     tf3 = []
+                #     tf4 = []
+                #     tf5 = []
 
             # if len(data)==6:
             # 	data = [int(i) for i in data]
