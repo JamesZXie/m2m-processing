@@ -50,6 +50,8 @@ def tada_eval(tf0, tf1, tf3, tf5):
     condition4 = False
 
     for val0, val1, val3, val5 in zip(tf0, tf1, tf3, tf5):
+        if val0 > 20000:
+            return False
         if val1 > 12000:
             condition1 = True
         if val3 > 30000:
@@ -62,15 +64,17 @@ def tada_eval(tf0, tf1, tf3, tf5):
             return True
     return False
 
-def boing_eval(tf3):
+def boing_eval(tf3, tf4):
     condition1 = 0
     condition2 = 0
 
-    for val1 in tf3:
+    for val1, val2 in zip(tf3, tf4):
         if val1 < -10000: 
             condition1 += 1
         if val1 > 10000: 
             condition2 += 1
+        if val2 > 25000:
+            return False
         if  condition1 > 4 and condition2 > 4:
             return True
     return False
@@ -136,34 +140,9 @@ def read_start():
                 tf3 = tf3[1:]
                 tf4 = tf4[1:]
                 tf5 = tf5[1:]
-                if tada_eval(tf0, tf1, tf3, tf5):
-                    arduino.flush()
-                    play_sound("tada.wav")
-                    print("TADA")
-                    for i in range(109):
-	                    arduino.readline()
-                    tf0 = []
-                    tf1 = []
-                    tf2 = []
-                    tf3 = []
-                    tf4 = []
-                    tf5 = []
-                # if boing_eval(tf3):
-                #     arduino.flush()
-                #     play_sound("boing.wav")
-                #     print("BOING")
-                #     for i in range(109):
-                #         arduino.readline()
-                #     tf0 = []
-                #     tf1 = []
-                #     tf2 = []
-                #     tf3 = []
-                #     tf4 = []
-                #     tf5 = []
                 if baseball_eval(tf1, tf2, tf4, tf5):
                     arduino.flush()
                     play_sound("swing.wav")
-                    print("SWING")
                     for i in range(109):
                         arduino.readline()
                     tf0 = []
@@ -172,6 +151,29 @@ def read_start():
                     tf3 = []
                     tf4 = []
                     tf5 = []
+                if tada_eval(tf0, tf1, tf3, tf5):
+                    arduino.flush()
+                    play_sound("tada.wav")
+                    for i in range(109):
+	                    arduino.readline()
+                    tf0 = []
+                    tf1 = []
+                    tf2 = []
+                    tf3 = []
+                    tf4 = []
+                    tf5 = []
+                if boing_eval(tf3, tf4):
+                    arduino.flush()
+                    play_sound("boing.wav")
+                    for i in range(109):
+                        arduino.readline()
+                    tf0 = []
+                    tf1 = []
+                    tf2 = []
+                    tf3 = []
+                    tf4 = []
+                    tf5 = []
+                
                 # if skrrt_eval(tf4):
                 #     arduino.flush()
                 #     play_sound("skrrt.wav")
